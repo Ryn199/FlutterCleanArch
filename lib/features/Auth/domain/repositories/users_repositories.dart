@@ -9,4 +9,9 @@ abstract class AuthRepository {
   );
   Future<Either<Exception, UserEntity>> signInWithGoogle();
   Future<Either<Exception, void>> signOut();
+  Future<Either<Exception, UserEntity>> createUserWithEmailAndPassword(
+    String name,
+    String email,
+    String password,
+  );
 }

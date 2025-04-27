@@ -1,4 +1,3 @@
-
 import 'package:dartz/dartz.dart';
 
 import '../../domain/entities/users.dart';
@@ -28,5 +27,17 @@ class AuthRepositoriesImplementation implements AuthRepository {
   @override
   Future<Either<Exception, void>> signOut() {
     throw UnimplementedError();
+  }
+
+  @override
+  Future<Either<Exception, UserEntity>> createUserWithEmailAndPassword(
+      String name, String email, String password) async {
+    try {
+      final data = await dataSource.createUserWithEmailAndPassword(
+          name, email, password);
+      return Right(data);
+    } catch (e) {
+      return Left(Exception(e.toString()));
+    }
   }
 }

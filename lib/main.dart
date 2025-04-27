@@ -1,7 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutterclean/core/usecase/component/cubit/option_cubit.dart';
 import 'package:flutterclean/core/usecase/routes/routes.dart';
+import 'package:flutterclean/features/Auth/presentation/bloc/auth_bloc.dart';
+import 'package:flutterclean/features/Favorite/presentation/bloc/favorite_bloc.dart';
 import 'package:flutterclean/features/ProductCategory/presentation/bloc/category_bloc.dart';
 import 'package:flutterclean/features/ProductType/presentation/bloc/product_type_bloc.dart';
 import 'package:flutterclean/features/Supplier/presentation/bloc/supplier_bloc.dart';
@@ -24,6 +27,16 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider<OptionCubit>(
+          create: (context) => OptionCubit(),
+        ),
+        BlocProvider<AuthBloc>(
+          create: (context) => AuthBloc(
+            signInWithEmail: myinjection(),
+            registerWithEmail: myinjection(),
+            // : myinjection(),
+          ),
+        ),
         BlocProvider<ProdukBloc>(
           create: (context) => ProdukBloc(
             produkUsecasesAdd: myinjection(),
@@ -67,6 +80,15 @@ class MyApp extends StatelessWidget {
             supplierUsecasesEdit: myinjection(),
             supplierUsecasesGetAll: myinjection(),
             supplierUsecasesGetById: myinjection(),
+          ),
+        ),
+        BlocProvider<FavoriteBloc>(
+          create: (context) => FavoriteBloc(
+            favoriteUsecasesAdd: myinjection(),
+            favoriteUsecasesDelete: myinjection(),
+            favoriteUsecasesEdit: myinjection(),
+            favoriteUsecasesGetAll: myinjection(),
+            favoriteUsecasesGetById: myinjection(),
           ),
         ),
       ],

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutterclean/features/Favorite/data/models/favorite_model.dart';
-import 'package:flutterclean/features/Favorite/presentation/bloc/favorite_bloc.dart';
 import 'package:flutterclean/features/ProductCategory/presentation/bloc/category_bloc.dart';
 import 'package:flutterclean/features/ProductCategory/presentation/bloc/category_state.dart';
 import 'package:flutterclean/features/ProductType/presentation/bloc/product_type_bloc.dart';
@@ -27,19 +25,19 @@ class ProdukPages extends StatelessWidget {
                 showModalBottomSheet(
                   context: context,
                   builder: (context) {
+                          String? SelectedCategoryValue;
                     TextEditingController namaProdukController =
                         TextEditingController();
                     TextEditingController hargaProdukController =
                         TextEditingController();
                     TextEditingController deskripsiProdukController =
                         TextEditingController();
-                    String? selectedCategoryIdValue;
-                    String? selectedProductTypeIdValue;
-                    String? selectedWarehouseIdValue;
-                    // TextEditingController productTypeIdController =
-                    //     TextEditingController();
-                    // TextEditingController warehouseIdController =
-                    //     TextEditingController();
+                    String? categoryIdController =
+                        SelectedCategoryValue;
+                    TextEditingController productTypeIdController =
+                        TextEditingController();
+                    TextEditingController warehouseIdController =
+                        TextEditingController();
 
                     return Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -76,7 +74,7 @@ class ProdukPages extends StatelessWidget {
                           SizedBox(
                             height: 10,
                           ),
-                          //DROPDOWN CATEGORY
+
                           BlocBuilder<CategoryBloc, CategoryState>(
                               bloc: context.read<CategoryBloc>()
                                 ..add(CategoryEventGetAll()),
@@ -91,60 +89,31 @@ class ProdukPages extends StatelessWidget {
                                             ))
                                         .toList(),
                                     onChanged: (value) {
-                                      selectedCategoryIdValue = value;
+                                      SelectedCategoryValue = value;
                                     },
                                   );
                                 }
                                 return Container();
                               }),
+
                           SizedBox(
                             height: 10,
                           ),
-                          //DROPDOWN ProductType
-                          BlocBuilder<ProductTypeBloc, ProductTypeState>(
-                              bloc: context.read<ProductTypeBloc>()
-                                ..add(ProductTypeEventGetAll()),
-                              builder: (context, state) {
-                                if (state is ProductTypeStateLoadedAll) {
-                                  return DropdownButtonFormField<String>(
-                                    value: state.productTypes.first.id,
-                                    items: state.productTypes
-                                        .map((e) => DropdownMenuItem(
-                                              value: e.id,
-                                              child: Text(e.productTypeName),
-                                            ))
-                                        .toList(),
-                                    onChanged: (value) {
-                                      selectedProductTypeIdValue = value;
-                                    },
-                                  );
-                                }
-                                return Container();
-                              }),
+                          TextFormField(
+                            controller: productTypeIdController,
+                            decoration: const InputDecoration(
+                                labelText: "Id Jenis Produk",
+                                border: OutlineInputBorder()),
+                          ),
                           SizedBox(
                             height: 10,
                           ),
-                          //DROPDOWN WAREHOUSES
-                          BlocBuilder<WarehouseBloc, WarehouseState>(
-                              bloc: context.read<WarehouseBloc>()
-                                ..add(WarehouseEventGetAll()),
-                              builder: (context, state) {
-                                if (state is WarehouseStateLoadedAll) {
-                                  return DropdownButtonFormField<String>(
-                                    value: state.warehouses.first.id,
-                                    items: state.warehouses
-                                        .map((e) => DropdownMenuItem(
-                                              value: e.id,
-                                              child: Text(e.warehouseName),
-                                            ))
-                                        .toList(),
-                                    onChanged: (value) {
-                                      selectedWarehouseIdValue = value;
-                                    },
-                                  );
-                                }
-                                return Container();
-                              }),
+                          TextFormField(
+                            controller: warehouseIdController,
+                            decoration: const InputDecoration(
+                                labelText: "Id Gudang",
+                                border: OutlineInputBorder()),
+                          ),
                           SizedBox(
                             height: 10,
                           ),
@@ -155,6 +124,13 @@ class ProdukPages extends StatelessWidget {
                                     SnackBar(content: Text(state.message)));
                               }
                               if (state is ProdukStateSuccess) {
+                                namaProdukController.clear();
+                                hargaProdukController.clear();
+                                deskripsiProdukController.clear();
+                                categoryIdController.clear();
+                                productTypeIdController.clear();
+                                warehouseIdController.clear();
+
                                 context.pop();
                                 context
                                     .read<ProdukBloc>()
@@ -173,13 +149,11 @@ class ProdukPages extends StatelessWidget {
                                           harga: hargaProdukController.text,
                                           deskripsi:
                                               deskripsiProdukController.text,
-                                          categoryId: selectedCategoryIdValue
-                                              .toString(),
+                                          categoryId: SelectedCategoryValue.text,
                                           productTypeId:
-                                              selectedProductTypeIdValue
-                                                  .toString(),
-                                          warehouseId: selectedWarehouseIdValue
-                                              .toString(),
+                                              productTypeIdController.text,
+                                          warehouseId:
+                                              warehouseIdController.text,
                                         )));
                                   },
                                   icon: state is ProdukStateLoading
@@ -292,11 +266,9 @@ class ProdukPages extends StatelessWidget {
                     ),
                   ),
                   trailing: SizedBox(
-                    width: 200,
+                    width: 100,
                     child: Row(
                       children: [
-
-                        //delete
                         IconButton(
                           onPressed: () {
                             context
@@ -421,19 +393,6 @@ class ProdukPages extends StatelessWidget {
                           },
                           icon: Icon(Icons.edit),
                         ),
-
-                      //tambah ke favorite
-                        IconButton(
-                          icon: Icon(Icons.favorite_border),
-                          onPressed: () {
-                            final favoriteModel = FavoriteModel(
-                              id: '',
-                              produkId: produk.id,
-                            );
-                            context.read<FavoriteBloc>().add(
-                                FavoriteEventAdd(favoriteModel: favoriteModel));
-                          },
-                        )
                       ],
                     ),
                   ),

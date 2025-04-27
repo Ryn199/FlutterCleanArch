@@ -1,10 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutterclean/core/usecase/component/cubit/option_cubit.dart';
 import 'package:flutterclean/features/Auth/data/datasources/auth_datasource.dart';
 import 'package:flutterclean/features/Auth/data/repositories/auth_repositories_implementation.dart';
 import 'package:flutterclean/features/Auth/domain/repositories/users_repositories.dart';
 import 'package:flutterclean/features/Auth/domain/usecases/auth_usecase.dart';
 import 'package:flutterclean/features/Auth/presentation/bloc/auth_bloc.dart';
+import 'package:flutterclean/features/Favorite/data/datasources/favorite_datasource.dart';
+import 'package:flutterclean/features/Favorite/data/repositories/Favorite_repositories_implementation.dart';
+import 'package:flutterclean/features/Favorite/domain/repositories/favorite_repositories.dart';
+import 'package:flutterclean/features/Favorite/domain/usecases/favorite_usecases.dart';
+import 'package:flutterclean/features/Favorite/presentation/bloc/favorite_bloc.dart';
 import 'package:flutterclean/features/ProductCategory/data/datasources/category_datasource.dart';
 import 'package:flutterclean/features/ProductCategory/data/repositories/category_repositories_implementation.dart';
 import 'package:flutterclean/features/ProductCategory/domain/repositories/category_repositories.dart';
@@ -38,17 +44,26 @@ Future<void> init() async {
   myinjection.registerLazySingleton(() => FirebaseFirestore.instance);
   // myinjection.registerLazySingleton(() => FirebaseStorage.instance);
 
+  //optionCubit
+  myinjection.registerFactory(
+    () => OptionCubit(),
+  );
+
   /// FEATURE - AUTH
   // BLOC
   myinjection.registerFactory(
     () => AuthBloc(
       signInWithEmail: myinjection(),
+      registerWithEmail: myinjection(),
     ),
   );
 
   // USECASE
   myinjection.registerLazySingleton(
     () => SignInWithEmail(repository: myinjection()),
+  );
+  myinjection.registerLazySingleton(
+    () => RegisterWithEmail(repository: myinjection()),
   );
 
   // REPOSITORY
@@ -59,7 +74,6 @@ Future<void> init() async {
   // DATA SOURCE
   myinjection.registerLazySingleton<AuthRemoteDataSource>(
       () => AuthRemoteDataSourceImplementation(firebaseAuth: myinjection()));
-
 
   /// FEATURE - PRODUK
   // BLOC
@@ -99,17 +113,6 @@ Future<void> init() async {
   myinjection.registerLazySingleton<ProdukRemoteDataSource>(() =>
       ProdukRemoteDataSourceImplementation(firebaseFirestore: myinjection()));
 
-
-
-
-
-
-
-
-
-
-
-      
   /// FEATURE - Category
   // BLOC
   myinjection.registerFactory(
@@ -141,16 +144,14 @@ Future<void> init() async {
 
   // REPOSITORY
   myinjection.registerLazySingleton<CategoryRepositories>(
-    () => CategoryRepositoriesImplementation(categoryRemoteDatasource: myinjection()),
+    () => CategoryRepositoriesImplementation(
+        categoryRemoteDatasource: myinjection()),
   );
 
   // DATA SOURCE
   myinjection.registerLazySingleton<CategoryRemoteDatasource>(() =>
       CategoryRemoteDatasourceImplementation(firebaseFirestore: myinjection()));
 
-
-
-      
   /// FEATURE - PRODUK TYPE
   // BLOC
   myinjection.registerFactory(
@@ -182,16 +183,14 @@ Future<void> init() async {
 
   // REPOSITORY
   myinjection.registerLazySingleton<ProductTypeRepositories>(
-    () => ProductTypeRepositoriesImplementation(productTypeRemoteDataSource: myinjection()),
+    () => ProductTypeRepositoriesImplementation(
+        productTypeRemoteDataSource: myinjection()),
   );
 
   // DATA SOURCE
   myinjection.registerLazySingleton<ProductTypeRemoteDatasource>(() =>
-      ProductTypeRemoteDatasourceImplementation(firebaseFirestore: myinjection()));
-
-
-
-
+      ProductTypeRemoteDatasourceImplementation(
+          firebaseFirestore: myinjection()));
 
   /// FEATURE - WAREHOUSE
   // BLOC
@@ -224,17 +223,16 @@ Future<void> init() async {
 
   // REPOSITORY
   myinjection.registerLazySingleton<WarehouseRepositories>(
-    () => WarehouseRepositoriesImplementation(warehouseRemoteDataSource: myinjection()),
+    () => WarehouseRepositoriesImplementation(
+        warehouseRemoteDataSource: myinjection()),
   );
 
   // DATA SOURCE
   myinjection.registerLazySingleton<WarehouseRemoteDatasource>(() =>
-      WarehouseRemoteDatasourceImplementation(firebaseFirestore: myinjection()));
+      WarehouseRemoteDatasourceImplementation(
+          firebaseFirestore: myinjection()));
 
-
-
-
-/// FEATURE - SUPPLIER
+  /// FEATURE - SUPPLIER
   // BLOC
   myinjection.registerFactory(
     () => SupplierBloc(
@@ -265,11 +263,52 @@ Future<void> init() async {
 
   // REPOSITORY
   myinjection.registerLazySingleton<SupplierRepositories>(
-    () => SupplierRepositoriesImplementation(supplierRemoteDatasource: myinjection()),
+    () => SupplierRepositoriesImplementation(
+        supplierRemoteDatasource: myinjection()),
   );
 
   // DATA SOURCE
   myinjection.registerLazySingleton<SupplierRemoteDatasource>(() =>
       SupplierRemoteDatasourceImplementation(firebaseFirestore: myinjection()));
 
+
+  /// FEATURE - FAVORITE
+  // BLOC
+  myinjection.registerFactory(
+    () => FavoriteBloc(
+      favoriteUsecasesAdd: myinjection(),
+      favoriteUsecasesDelete: myinjection(),
+      favoriteUsecasesEdit: myinjection(),
+      favoriteUsecasesGetAll: myinjection(),
+      favoriteUsecasesGetById: myinjection(),
+    ),
+  );
+
+  // USECASE
+  myinjection.registerLazySingleton(
+    () => FavoriteUsecasesAdd(favoriteRepositories: myinjection()),
+  );
+  myinjection.registerLazySingleton(
+    () => FavoriteUsecasesEdit(favoriteRepositories: myinjection()),
+  );
+  myinjection.registerLazySingleton(
+    () => FavoriteUsecasesDelete(favoriteRepositories: myinjection()),
+  );
+  myinjection.registerLazySingleton(
+    () => FavoriteUsecasesGetAll(favoriteRepositories: myinjection()),
+  );
+  myinjection.registerLazySingleton(
+    () => FavoriteUsecasesGetById(favoriteRepositories: myinjection()),
+  );
+
+  // REPOSITORY
+  myinjection.registerLazySingleton<FavoriteRepositories>(
+    () => FavoriteRepositoriesImplementation(
+        favoriteRemoteDatasource: myinjection()),
+  );
+
+  // DATA SOURCE
+  myinjection.registerLazySingleton<FavoriteRemoteDatasource>(() =>
+      FavoriteRemoteDatasourceImplementation(
+          firebaseFirestore: myinjection()));
 }
