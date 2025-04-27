@@ -17,10 +17,29 @@ class FavoriteRemoteDatasourceImplementation
   FavoriteRemoteDatasourceImplementation({required this.firebaseFirestore});
 
   @override
-  Future<void> addFavorite({required FavoriteModel favorite}) async {
-    await firebaseFirestore
-        .collection('favorites')
-        .add(favorite.toFireStore());
+ Future<void> addFavorite({required FavoriteModel favorite}) async {
+    try {
+      // Cek id yg smaa
+      final querySnapshot = await firebaseFirestore
+          .collection('favorites')
+          .where('productId',
+              isEqualTo:
+                  favorite.produkId)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        // tambah kalo belum ada
+        await firebaseFirestore
+            .collection('favorites')
+            .add(favorite.toFireStore());
+      } else {
+        // udah ada, kasi error
+        throw Exception('Produk sudah ada di favorite');
+      }
+    } catch (e) {
+      //elseelse
+      throw Exception('Error menambahkan ke favorite: $e');
+    }
   }
 
   @override
