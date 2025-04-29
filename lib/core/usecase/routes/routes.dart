@@ -1,19 +1,26 @@
-import 'package:flutterclean/features/Auth/presentation/pages/login.dart';
-import 'package:flutterclean/features/Auth/presentation/pages/register.dart';
-import 'package:flutterclean/features/Favorite/presentation/pages/favorite_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutterclean/features/auth/presentation/pages/login.dart';
+import 'package:flutterclean/features/auth/presentation/pages/register.dart';
 import 'package:flutterclean/features/ProductCategory/presentation/pages/Category_page.dart';
 import 'package:flutterclean/features/ProductType/presentation/pages/product_type_page.dart';
 import 'package:flutterclean/features/Supplier/presentation/pages/supplier_page.dart';
+import 'package:flutterclean/features/cart/presentation/pages/cart_pages.dart';
+import 'package:flutterclean/features/favorite/presentation/pages/favorite_page.dart';
 import 'package:flutterclean/features/produk/presentation/pages/produk_page.dart';
 import 'package:flutterclean/features/warehouse/presentation/pages/warehouse_page.dart';
+import 'package:flutterclean/my_injection.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class MyRouter {
   get router => GoRouter(
-        initialLocation: '/',
+        initialLocation: myinjection<FirebaseAuth>().currentUser == null ||
+                myinjection<Box>().get('uid') == null
+            ? '/login'
+            : '/product',
         routes: [
           GoRoute(
-            path: '/',
+            path: '/login',
             name: 'login',
             pageBuilder: (context, state) =>
                 const NoTransitionPage(child: LoginPage()),
@@ -60,12 +67,12 @@ class MyRouter {
             pageBuilder: (context, state) =>
                 const NoTransitionPage(child: FavoritePage()),
           ),
-          // GoRoute(
-          //   path: '/keranjang',
-          //   name: 'keranjang',
-          //   pageBuilder: (context, state) =>
-          //       const NoTransitionPage(child: KeranjangPage()),
-          // ),
+          GoRoute(
+            path: '/cart',
+            name: 'cart',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: CartPage()),
+          ),
         ],
       );
 }

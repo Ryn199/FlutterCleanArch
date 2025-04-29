@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutterclean/features/favorite/domain/entities/favorite.dart';
+import 'package:flutterclean/features/cart/domain/entities/cart.dart';
 
-class FavoriteModel extends Favorite {
-  const FavoriteModel(
+class CartModel extends Cart {
+  const CartModel(
       {required super.id,
       required super.produkId,
+      required super.quantity,
       required super.namaProduk,
       required super.harga,
       required super.deskripsi,
@@ -12,11 +13,12 @@ class FavoriteModel extends Favorite {
       required super.productTypeId,
       required super.warehouseId});
 
-  factory FavoriteModel.fromFirestore(DocumentSnapshot doc) {
+  factory CartModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    return FavoriteModel(
+    return CartModel(
       id: doc.id,
       produkId: data['produkId'],
+      quantity: data['quantity'],
       namaProduk: data['namaProduk'],
       harga: data['harga'],
       deskripsi: data['deskripsi'],
@@ -29,6 +31,7 @@ class FavoriteModel extends Favorite {
   Map<String, dynamic> toFireStore() {
     return {
       'produkId': produkId,
+      'quantity': quantity,
       'namaProduk': namaProduk,
       'harga': harga,
       'deskripsi': deskripsi,

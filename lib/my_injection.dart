@@ -1,16 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutterclean/core/usecase/component/cubit/option_cubit.dart';
-import 'package:flutterclean/features/Auth/data/datasources/auth_datasource.dart';
-import 'package:flutterclean/features/Auth/data/repositories/auth_repositories_implementation.dart';
-import 'package:flutterclean/features/Auth/domain/repositories/users_repositories.dart';
-import 'package:flutterclean/features/Auth/domain/usecases/auth_usecase.dart';
-import 'package:flutterclean/features/Auth/presentation/bloc/auth_bloc.dart';
-import 'package:flutterclean/features/Favorite/data/datasources/favorite_datasource.dart';
-import 'package:flutterclean/features/Favorite/data/repositories/Favorite_repositories_implementation.dart';
-import 'package:flutterclean/features/Favorite/domain/repositories/favorite_repositories.dart';
-import 'package:flutterclean/features/Favorite/domain/usecases/favorite_usecases.dart';
-import 'package:flutterclean/features/Favorite/presentation/bloc/favorite_bloc.dart';
+import 'package:flutterclean/features/auth/data/datasources/auth_datasource.dart';
+import 'package:flutterclean/features/auth/data/repositories/auth_repositories_implementation.dart';
+import 'package:flutterclean/features/auth/domain/repositories/users_repositories.dart';
+import 'package:flutterclean/features/auth/domain/usecases/auth_usecase.dart';
+import 'package:flutterclean/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:flutterclean/features/cart/data/datasources/cart_datasources.dart';
+import 'package:flutterclean/features/cart/data/repositories/cart_repositories_implementation.dart';
+import 'package:flutterclean/features/cart/domain/repositories/cart_repositories.dart';
+import 'package:flutterclean/features/cart/domain/usecases/cart_usecases.dart';
+import 'package:flutterclean/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:flutterclean/features/favorite/data/datasources/favorite_datasource.dart';
+import 'package:flutterclean/features/favorite/data/repositories/favorite_repositories_implementation.dart';
+import 'package:flutterclean/features/favorite/domain/repositories/favorite_repositories.dart';
+import 'package:flutterclean/features/favorite/domain/usecases/favorite_usecases.dart';
+import 'package:flutterclean/features/favorite/presentation/bloc/favorite_bloc.dart';
 import 'package:flutterclean/features/ProductCategory/data/datasources/category_datasource.dart';
 import 'package:flutterclean/features/ProductCategory/data/repositories/category_repositories_implementation.dart';
 import 'package:flutterclean/features/ProductCategory/domain/repositories/category_repositories.dart';
@@ -22,7 +27,7 @@ import 'package:flutterclean/features/ProductType/domain/repositories/product_ty
 import 'package:flutterclean/features/ProductType/domain/usecases/product_type_usecases.dart';
 import 'package:flutterclean/features/ProductType/presentation/bloc/product_type_bloc.dart';
 import 'package:flutterclean/features/Supplier/data/datasources/supplier_datasource.dart';
-import 'package:flutterclean/features/Supplier/data/repositories/category_repositories_implementation.dart';
+import 'package:flutterclean/features/Supplier/data/repositories/supplier_repositories_implementation.dart';
 import 'package:flutterclean/features/Supplier/domain/repositories/supplier_repositories.dart';
 import 'package:flutterclean/features/Supplier/domain/usecases/supplier_usecases.dart';
 import 'package:flutterclean/features/Supplier/presentation/bloc/supplier_bloc.dart';
@@ -37,11 +42,14 @@ import 'package:flutterclean/features/warehouse/domain/repositories/warehouse_re
 import 'package:flutterclean/features/warehouse/domain/usecases/warehouse_usecases.dart';
 import 'package:flutterclean/features/warehouse/presentation/bloc/warehouse_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:hive/hive.dart';
 
 var myinjection = GetIt.instance;
 Future<void> init() async {
   myinjection.registerLazySingleton(() => FirebaseAuth.instance);
   myinjection.registerLazySingleton(() => FirebaseFirestore.instance);
+  var box = await Hive.openBox('box');
+  myinjection.registerLazySingleton(() => box);
   // myinjection.registerLazySingleton(() => FirebaseStorage.instance);
 
   //optionCubit
@@ -73,7 +81,12 @@ Future<void> init() async {
 
   // DATA SOURCE
   myinjection.registerLazySingleton<AuthRemoteDataSource>(
-      () => AuthRemoteDataSourceImplementation(firebaseAuth: myinjection()));
+    () => AuthRemoteDataSourceImplementation(
+      firebaseAuth: myinjection<FirebaseAuth>(),
+      firebaseFirestore: myinjection<FirebaseFirestore>(),
+      box: myinjection(),
+    ),
+  );
 
   /// FEATURE - PRODUK
   // BLOC
@@ -271,7 +284,6 @@ Future<void> init() async {
   myinjection.registerLazySingleton<SupplierRemoteDatasource>(() =>
       SupplierRemoteDatasourceImplementation(firebaseFirestore: myinjection()));
 
-
   /// FEATURE - FAVORITE
   // BLOC
   myinjection.registerFactory(
@@ -309,6 +321,45 @@ Future<void> init() async {
 
   // DATA SOURCE
   myinjection.registerLazySingleton<FavoriteRemoteDatasource>(() =>
-      FavoriteRemoteDatasourceImplementation(
-          firebaseFirestore: myinjection()));
+      FavoriteRemoteDatasourceImplementation(firebaseFirestore: myinjection()));
+
+
+  /// FEATURE - CART
+  // BLOC
+  myinjection.registerFactory(
+    () => CartBloc(
+      cartUsecasesAdd: myinjection(),
+      cartUsecasesDelete: myinjection(),
+      cartUsecasesEdit: myinjection(),
+      cartUsecasesGetAll: myinjection(),
+      cartUsecasesGetById: myinjection(),
+    ),
+  );
+
+  // USECASE
+  myinjection.registerLazySingleton(
+    () => CartUsecasesAdd(cartRepositories: myinjection()),
+  );
+  myinjection.registerLazySingleton(
+    () => CartUsecasesEdit(cartRepositories: myinjection()),
+  );
+  myinjection.registerLazySingleton(
+    () => CartUsecasesDelete(cartRepositories: myinjection()),
+  );
+  myinjection.registerLazySingleton(
+    () => CartUsecasesGetAll(cartRepositories: myinjection()),
+  );
+  myinjection.registerLazySingleton(
+    () => CartUsecasesGetById(cartRepositories: myinjection()),
+  );
+
+  // REPOSITORY
+  myinjection.registerLazySingleton<CartRepositories>(
+    () => CartRepositoriesImplementation(
+        cartRemoteDatasource: myinjection()),
+  );
+
+  // DATA SOURCE
+  myinjection.registerLazySingleton<CartRemoteDatasource>(() =>
+      CartRemoteDatasourceImplementation(firebaseFirestore: myinjection()));
 }

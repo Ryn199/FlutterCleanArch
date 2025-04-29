@@ -1,8 +1,9 @@
 import 'package:equatable/equatable.dart';
 
-class Favorite extends Equatable {
+class Cart extends Equatable {
   final String id;
   final String produkId;
+  final String quantity;
   final String namaProduk;
   final String harga;
   final String deskripsi;
@@ -10,9 +11,10 @@ class Favorite extends Equatable {
   final String productTypeId;
   final String warehouseId;
 
-  const Favorite({
+  const Cart({
     required this.id,
     required this.produkId,
+    required this.quantity,
     required this.namaProduk,
     required this.harga,
     required this.deskripsi,
@@ -25,6 +27,7 @@ class Favorite extends Equatable {
   List<Object?> get props => [
         id,
         produkId,
+        quantity,
         namaProduk,
         harga,
         deskripsi,

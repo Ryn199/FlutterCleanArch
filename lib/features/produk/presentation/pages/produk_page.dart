@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutterclean/features/Favorite/data/models/favorite_model.dart';
-import 'package:flutterclean/features/Favorite/presentation/bloc/favorite_bloc.dart';
+import 'package:flutterclean/features/cart/data/models/cart_model.dart';
+import 'package:flutterclean/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:flutterclean/features/cart/presentation/bloc/cart_state.dart';
+import 'package:flutterclean/features/favorite/data/models/favorite_model.dart';
+import 'package:flutterclean/features/favorite/presentation/bloc/favorite_bloc.dart';
 import 'package:flutterclean/features/ProductCategory/presentation/bloc/category_bloc.dart';
 import 'package:flutterclean/features/ProductCategory/presentation/bloc/category_state.dart';
 import 'package:flutterclean/features/ProductType/presentation/bloc/product_type_bloc.dart';
@@ -18,6 +21,7 @@ class ProdukPages extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       appBar: AppBar(
         title: Text('Produk Pages'),
@@ -295,7 +299,6 @@ class ProdukPages extends StatelessWidget {
                     width: 200,
                     child: Row(
                       children: [
-
                         //delete
                         IconButton(
                           onPressed: () {
@@ -422,16 +425,42 @@ class ProdukPages extends StatelessWidget {
                           icon: Icon(Icons.edit),
                         ),
 
-                      //tambah ke favorite
+                        //tambah ke favorite
                         IconButton(
                           icon: Icon(Icons.favorite_border),
                           onPressed: () {
                             final favoriteModel = FavoriteModel(
                               id: '',
                               produkId: produk.id,
+                              namaProduk: produk.namaProduk,
+                              harga: produk.harga,
+                              deskripsi: produk.deskripsi,
+                              categoryId: produk.categoryId,
+                              productTypeId: produk.productTypeId,
+                              warehouseId: produk.warehouseId,
                             );
                             context.read<FavoriteBloc>().add(
                                 FavoriteEventAdd(favoriteModel: favoriteModel));
+                          },
+                        ),
+                        //tambah kereanjang
+                        IconButton(
+                          icon: Icon(Icons.plus_one_outlined),
+                          onPressed: () {
+                            final cartModel = CartModel(
+                              id: '',
+                              produkId: produk.id,
+                              quantity: '1',
+                              namaProduk: produk.namaProduk,
+                              harga: produk.harga,
+                              deskripsi: produk.deskripsi,
+                              categoryId: produk.categoryId,
+                              productTypeId: produk.productTypeId,
+                              warehouseId: produk.warehouseId,
+                            );
+                            context
+                                .read<CartBloc>()
+                                .add(CartEventAdd(cartModel: cartModel));
                           },
                         )
                       ],

@@ -1,8 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutterclean/features/Favorite/data/models/favorite_model.dart';
-import 'package:flutterclean/features/Favorite/domain/usecases/favorite_usecases.dart';
-import 'package:flutterclean/features/Favorite/presentation/bloc/favorite_state.dart';
+import 'package:flutterclean/features/favorite/data/models/favorite_model.dart';
+import 'package:flutterclean/features/favorite/domain/usecases/favorite_usecases.dart';
+import 'package:flutterclean/features/favorite/presentation/bloc/favorite_state.dart';
 
 part 'favorite_event.dart';
 

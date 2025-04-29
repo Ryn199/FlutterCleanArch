@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
-import 'package:flutterclean/features/Favorite/data/datasources/favorite_datasource.dart';
-import 'package:flutterclean/features/Favorite/data/models/favorite_model.dart';
-import 'package:flutterclean/features/Favorite/domain/entities/favorite.dart';
-import 'package:flutterclean/features/Favorite/domain/repositories/favorite_repositories.dart';
+import 'package:flutterclean/features/favorite/data/datasources/favorite_datasource.dart';
+import 'package:flutterclean/features/favorite/data/models/favorite_model.dart';
+import 'package:flutterclean/features/favorite/domain/entities/favorite.dart';
+import 'package:flutterclean/features/favorite/domain/repositories/favorite_repositories.dart';
 
 class FavoriteRepositoriesImplementation implements FavoriteRepositories{
   final FavoriteRemoteDatasource favoriteRemoteDatasource;

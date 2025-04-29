@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutterclean/features/Auth/data/models/users_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutterclean/features/auth/data/models/users_model.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 abstract class AuthRemoteDataSource {
   Future<UsersModel> signInWithEmailAndPassword(String email, String password);
@@ -11,43 +13,47 @@ abstract class AuthRemoteDataSource {
 
 class AuthRemoteDataSourceImplementation extends AuthRemoteDataSource {
   final FirebaseAuth firebaseAuth;
+  final FirebaseFirestore firebaseFirestore;
+  final Box box;
 
-  AuthRemoteDataSourceImplementation({required this.firebaseAuth});
+  AuthRemoteDataSourceImplementation({
+    required this.firebaseAuth,
+    required this.firebaseFirestore,
+    required this.box,
+  });
+
   @override
   Future<UsersModel> signInWithEmailAndPassword(
       String email, String password) async {
     try {
+      Box userBox = Hive.box('box');
       final credential = await firebaseAuth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
+     
+      final userDoc = await firebaseFirestore
+          .collection('users')
+          .doc(credential.user!.uid)
+          .get();
+      await userBox.put('uid', credential.user!.uid);
+      await userBox.put('name', userDoc.data()!['name']);
+      await userBox.put('email', userDoc.data()!['email']);
+      await userBox.put('photoUrl', userDoc.data()!['photoUrl']);
+
       return UsersModel.fromJson(credential.user!);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
-        throw Exception("email tidak ditemukan");
+        throw Exception('Tidak ada akun yang cocok.');
       } else if (e.code == 'wrong-password') {
-        throw Exception('password salah');
-      } else if (e.code == 'invalid-email') {
-        throw Exception('email tidak valid');
+        throw Exception('Password salah.');
       }
-      throw Exception("Error lainnya");
+      throw Exception('Login error: ${e.message}');
     } catch (e) {
-      throw Exception(e);
+      throw Exception(e.toString());
     }
   }
 
-  @override
-  Future<UsersModel> signInWithGoogle() {
-    // TODO: implement signInWithGoogle
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> signOut() {
-    // TODO: implement signOut
-    throw UnimplementedError();
-  }
-  
   @override
   Future<UsersModel> createUserWithEmailAndPassword(
       String name, String email, String password) async {
@@ -56,16 +62,40 @@ class AuthRemoteDataSourceImplementation extends AuthRemoteDataSource {
         email: email,
         password: password,
       );
-      return UsersModel.fromJson(credential.user!);
+
+      final user = credential.user;
+      if (user != null) {
+        await firebaseFirestore.collection('users').doc(user.uid).set({
+          'uid': user.uid,
+          'name': name,
+          'email': email,
+          'photoUrl': user.photoURL ?? '',
+          'isVerified': user.emailVerified,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+        return UsersModel.fromJson(user);
+      } else {
+        throw Exception('Failed to create user.');
+      }
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
-        throw Exception("Password lemah");
+        throw Exception('Password terlalu lemah.');
       } else if (e.code == 'email-already-in-use') {
-        throw Exception("Email sudah terpakai");
+        throw Exception('Email sudah digunakan.');
       }
-      throw Exception("Harap isi semua form terlebih dahulu!");
+      throw Exception('Register error: ${e.message}');
     } catch (e) {
-      throw Exception(e);
+      throw Exception(e.toString());
     }
+  }
+
+  @override
+  Future<UsersModel> signInWithGoogle() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> signOut() {
+    throw UnimplementedError();
   }
 }

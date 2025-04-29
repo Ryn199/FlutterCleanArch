@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutterclean/features/Favorite/data/models/favorite_model.dart';
-import 'package:flutterclean/features/Favorite/domain/entities/favorite.dart';
+import 'package:flutterclean/features/favorite/data/models/favorite_model.dart';
+import 'package:flutterclean/features/favorite/domain/entities/favorite.dart';
+import 'package:flutterclean/my_injection.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 abstract class FavoriteRemoteDatasource {
   Future<List<Favorite>> getAllFavorite();
@@ -13,19 +15,37 @@ abstract class FavoriteRemoteDatasource {
 class FavoriteRemoteDatasourceImplementation
     implements FavoriteRemoteDatasource {
   final FirebaseFirestore firebaseFirestore;
+  final users = myinjection<Box>();
 
   FavoriteRemoteDatasourceImplementation({required this.firebaseFirestore});
 
   @override
   Future<void> addFavorite({required FavoriteModel favorite}) async {
-    await firebaseFirestore
+    final isProdukExist = await firebaseFirestore
+        .collection('users')
+        .doc(users.get('uid'))
         .collection('favorites')
-        .add(favorite.toFireStore());
+        .where('produkId', isEqualTo: favorite.produkId)
+        .get();
+
+    if (isProdukExist.docs.isEmpty) {
+      await firebaseFirestore
+          .collection('users')
+          .doc(users.get('uid'))
+          .collection('favorites')
+          .add(favorite.toFireStore());
+    } else {
+      throw Exception('Produk sudah ada di favorite');
+    }
   }
-  
+
   @override
   Future<void> deleteFavorite({required String id}) async {
-    await firebaseFirestore.collection('favorites').doc(id).delete();
+    await firebaseFirestore
+    .collection('users')
+    .doc(users.get('uid'))
+    .collection('favorites')
+    .doc(id).delete();
   }
 
   @override
@@ -38,7 +58,10 @@ class FavoriteRemoteDatasourceImplementation
 
   @override
   Future<List<Favorite>> getAllFavorite() async {
-    final data = await firebaseFirestore.collection('favorites').get();
+    final data = await firebaseFirestore
+    .collection('users')
+    .doc(users.get('uid'))
+    .collection('favorites').get();
     return data.docs
         .map(
           (e) => FavoriteModel.fromFirestore(e),

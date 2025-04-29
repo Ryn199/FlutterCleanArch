@@ -1,6 +1,6 @@
 
 import 'package:equatable/equatable.dart';
-import 'package:flutterclean/features/Favorite/presentation/bloc/favorite_bloc.dart';
+import 'package:flutterclean/features/favorite/presentation/bloc/favorite_bloc.dart';
 
 import '../../domain/entities/favorite.dart';
 

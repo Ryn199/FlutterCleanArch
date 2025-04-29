@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutterclean/core/usecase/component/cubit/option_cubit.dart';
-import 'package:flutterclean/features/Auth/presentation/bloc/auth_bloc.dart';
+import 'package:flutterclean/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 class RegisterPages extends StatelessWidget {
@@ -120,9 +120,16 @@ class RegisterPages extends StatelessWidget {
                                 border: OutlineInputBorder(),
                               ),
                               validator: (String? value) {
-                                return (value != null && value.contains('@'))
-                                    ? 'Do not use the @ character.'
-                                    : null;
+                                if (value == null || value.isEmpty) {
+                                  return 'Password cannot be empty';
+                                }
+                                if (value.contains('@')) {
+                                  return 'Do not use the @ character.';
+                                }
+                                if (value != passwordController.text) {
+                                  return 'Password does not match';
+                                }
+                                return null;
                               },
                             );
                           },
@@ -156,7 +163,7 @@ class RegisterPages extends StatelessWidget {
                       );
                     }
                     if (state is AuthStateLoaded) {
-                      context.go('/login');
+                      context.go('/');
                     }
                   },
                   builder: (context, state) {

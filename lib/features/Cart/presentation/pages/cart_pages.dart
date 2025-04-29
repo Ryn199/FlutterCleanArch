@@ -1,60 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutterclean/features/favorite/presentation/bloc/favorite_bloc.dart';
+import 'package:flutterclean/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:flutterclean/features/ProductCategory/presentation/bloc/category_bloc.dart';
 import 'package:flutterclean/features/ProductCategory/presentation/bloc/category_state.dart';
 import 'package:flutterclean/features/ProductType/presentation/bloc/product_type_bloc.dart';
 import 'package:flutterclean/features/ProductType/presentation/bloc/product_type_state.dart';
-import 'package:flutterclean/features/favorite/presentation/bloc/favorite_state.dart';
+import 'package:flutterclean/features/cart/presentation/bloc/cart_state.dart';
 import 'package:flutterclean/features/warehouse/presentation/bloc/warehouse_bloc.dart';
 import 'package:flutterclean/features/warehouse/presentation/bloc/warehouse_event.dart';
 import 'package:flutterclean/features/warehouse/presentation/bloc/warehouse_state.dart';
 
-class FavoritePage extends StatelessWidget {
-  const FavoritePage({super.key});
+class CartPage extends StatelessWidget {
+  const CartPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Favorite Pages'),
+        title: Text('Cart Pages'),
       ),
-      body: BlocConsumer<FavoriteBloc, FavoriteState>(
-        bloc: context.read<FavoriteBloc>()..add(FavoriteEventGetAll()),
+      body: BlocConsumer<CartBloc, CartState>(
+        bloc: context.read<CartBloc>()..add(CartEventGetAll()),
         listener: (context, state) {
-          if (state is FavoriteStateError) {
+          if (state is CartStateError) {
             ScaffoldMessenger.of(context)
                 .showSnackBar(SnackBar(content: Text(state.message)));
           }
-          if (state is FavoriteStateSuccess) {
-            context.read<FavoriteBloc>().add(FavoriteEventGetAll());
+          if (state is CartStateSuccess) {
+            context.read<CartBloc>().add(CartEventGetAll());
           }
         },
         builder: (context, state) {
-          if (state is FavoriteStateLoadedAll) {
+          if (state is CartStateLoadedAll) {
             return ListView.builder(
-              itemCount: state.favorites.length,
+              itemCount: state.carts.length,
               itemBuilder: (context, index) {
-                var favorite = state.favorites[index];
+                var cart = state.carts[index];
 
-                //list favorite
+                //list cart
                 return ListTile(
-                  title: Text(favorite.namaProduk),
+                  title: Text(cart.namaProduk),
                   subtitle: SizedBox(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Text('Harga: ${favorite.harga}'),
-                        Text('Deskripsi: ${favorite.deskripsi}'),
+                        Text('Jumlah: ${cart.quantity}'),
+                        Text('Harga: ${cart.harga}'),
+                        Text('Deskripsi: ${cart.deskripsi}'),
 
                         // BlocBuilder untuk Kategori
-                        if (favorite.categoryId != null &&
-                            favorite.categoryId!.isNotEmpty)
+                        if (cart.categoryId != null &&
+                            cart.categoryId!.isNotEmpty)
                           BlocBuilder<CategoryBloc, CategoryState>(
                             bloc: context.read<CategoryBloc>()
                               ..add(
-                                  CategoryEventGetById(id: favorite.categoryId!)),
+                                  CategoryEventGetById(id: cart.categoryId!)),
                             builder: (context, stateCategory) {
                               if (stateCategory is CategoryStateLoaded) {
                                 return Text(
@@ -70,12 +71,12 @@ class FavoritePage extends StatelessWidget {
                           const Text('Kategori: Tidak tersedia'),
 
                         // Widget Jenis/ productType
-                        if (favorite.productTypeId != null &&
-                            favorite.productTypeId!.isNotEmpty)
+                        if (cart.productTypeId != null &&
+                            cart.productTypeId!.isNotEmpty)
                           BlocBuilder<ProductTypeBloc, ProductTypeState>(
                             bloc: context.read<ProductTypeBloc>()
                               ..add(ProductTypeEventGetById(
-                                  id: favorite.productTypeId ?? '')),
+                                  id: cart.productTypeId ?? '')),
                             builder: (context, stateProductType) {
                               if (stateProductType is ProductTypeStateError) {
                                 return Text(stateProductType.message);
@@ -92,12 +93,12 @@ class FavoritePage extends StatelessWidget {
                           const Text("Jenis: Null"),
 
                         // Widget Warehouse
-                        if (favorite.warehouseId != null &&
-                            favorite.warehouseId!.isNotEmpty)
+                        if (cart.warehouseId != null &&
+                            cart.warehouseId!.isNotEmpty)
                           BlocBuilder<WarehouseBloc, WarehouseState>(
                             bloc: context.read<WarehouseBloc>()
                               ..add(WarehouseEventGetById(
-                                  id: favorite.warehouseId ?? '')),
+                                  id: cart.warehouseId ?? '')),
                             builder: (context, stateWarehouse) {
                               if (stateWarehouse is WarehouseStateError) {
                                 return Text(stateWarehouse.message);
@@ -123,8 +124,8 @@ class FavoritePage extends StatelessWidget {
                         IconButton(
                           onPressed: () {
                             context
-                                .read<FavoriteBloc>()
-                                .add(FavoriteEventDelete(id: favorite.id));
+                                .read<CartBloc>()
+                                .add(CartEventDelete(id: cart.id));
                           },
                           icon: Icon(Icons.delete, color: Colors.red),
                         ),
@@ -135,7 +136,7 @@ class FavoritePage extends StatelessWidget {
               },
             );
           }
-          if (state is FavoriteStateLoading) {
+          if (state is CartStateLoading) {
             return Center(
               child: CircularProgressIndicator(),
             );

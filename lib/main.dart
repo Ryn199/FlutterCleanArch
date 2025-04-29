@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutterclean/core/usecase/component/cubit/option_cubit.dart';
 import 'package:flutterclean/core/usecase/routes/routes.dart';
-import 'package:flutterclean/features/Auth/presentation/bloc/auth_bloc.dart';
-import 'package:flutterclean/features/Favorite/presentation/bloc/favorite_bloc.dart';
+import 'package:flutterclean/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:flutterclean/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:flutterclean/features/favorite/presentation/bloc/favorite_bloc.dart';
 import 'package:flutterclean/features/ProductCategory/presentation/bloc/category_bloc.dart';
 import 'package:flutterclean/features/ProductType/presentation/bloc/product_type_bloc.dart';
 import 'package:flutterclean/features/Supplier/presentation/bloc/supplier_bloc.dart';
@@ -89,6 +90,15 @@ class MyApp extends StatelessWidget {
             favoriteUsecasesEdit: myinjection(),
             favoriteUsecasesGetAll: myinjection(),
             favoriteUsecasesGetById: myinjection(),
+          ),
+        ),
+        BlocProvider<CartBloc>(
+          create: (context) => CartBloc(
+            cartUsecasesAdd: myinjection(),
+            cartUsecasesDelete: myinjection(),
+            cartUsecasesEdit: myinjection(),
+            cartUsecasesGetAll: myinjection(),
+            cartUsecasesGetById: myinjection(),
           ),
         ),
       ],

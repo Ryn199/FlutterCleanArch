@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutterclean/features/Auth/domain/entities/users.dart';
-import 'package:flutterclean/features/Auth/domain/usecases/auth_usecase.dart';
+import 'package:flutterclean/features/auth/domain/entities/users.dart';
+import 'package:flutterclean/features/auth/domain/usecases/auth_usecase.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
